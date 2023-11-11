@@ -1,12 +1,7 @@
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import {
-  Image,
-  ScrollView,
-  Text,
-  View
-} from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 import { CalendarDaysIcon } from "react-native-heroicons/solid";
 import * as Progress from "react-native-progress";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,15 +20,21 @@ export default function HomeScreen() {
     temp: 0,
   });
   const { current } = weather;
-  const token = 'ExponentPushToken[r1r10oHPyGjCsuqxJ8b6CP]'
-  useEffect(() => { 
+  const token = "ExponentPushToken[r1r10oHPyGjCsuqxJ8b6CP]";
+  useEffect(() => {
     fetchMyWeatherData();
   }, []);
-  console.log('condition',current?.condition?.text);
   useEffect(() => {
     fetchData();
   }, [db]);
-  sendPushNotification(token,'Environment Monitor',generateText(env.temp,env.gas,current?.condition?.text))
+  if (new Date().getHours() == 10 && new Date().getMinutes() == 10) {
+    console.log("condition", current?.condition?.text);
+    sendPushNotification(
+      token,
+      "Environment Monitor",
+      generateText(env.temp, env.gas, current?.condition?.text)
+    );
+  }
   const fetchData = () => {
     const data = ref(db);
     onValue(data, (snapshot) => {
@@ -56,7 +57,6 @@ export default function HomeScreen() {
       setLoading(false);
     });
   };
-
 
   return (
     <View className="flex-1 relative">

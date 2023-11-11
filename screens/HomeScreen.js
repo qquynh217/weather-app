@@ -1,23 +1,20 @@
-import {
-  View,
-  Text,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { MagnifyingGlassIcon, XMarkIcon } from "react-native-heroicons/outline";
-import { CalendarDaysIcon, MapPinIcon } from "react-native-heroicons/solid";
-import { debounce } from "lodash";
-import { theme } from "../theme";
-import { fetchLocations, fetchWeatherForecast } from "../api/weather";
-import * as Progress from "react-native-progress";
+import * as Notifications from 'expo-notifications';
 import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  ScrollView,
+  Text,
+  View
+} from "react-native";
+import { CalendarDaysIcon } from "react-native-heroicons/solid";
+import * as Progress from "react-native-progress";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { generateText, sendPushNotification } from "../api/notification";
+import { fetchWeatherForecast } from "../api/weather";
 import { weatherImages } from "../constants";
-import { getData, storeData } from "../utils/asyncStorage";
-import { db, ref, onValue } from "../utils/firebase";
+import { theme } from "../theme";
+import { db, onValue, ref } from "../utils/firebase";
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
@@ -27,13 +24,16 @@ export default function HomeScreen() {
     humidity: 0,
     temp: 0,
   });
-
-  useEffect(() => {
+  const { current } = weather;
+  const token = 'ExponentPushToken[r1r10oHPyGjCsuqxJ8b6CP]'
+  useEffect(() => { 
     fetchMyWeatherData();
   }, []);
+  console.log('condition',current?.condition?.text);
   useEffect(() => {
     fetchData();
   }, [db]);
+  sendPushNotification(token,'Environment Monitor',generateText(env.temp,env.gas,current?.condition?.text))
   const fetchData = () => {
     const data = ref(db);
     onValue(data, (snapshot) => {
@@ -57,7 +57,6 @@ export default function HomeScreen() {
     });
   };
 
-  const { current } = weather;
 
   return (
     <View className="flex-1 relative">
